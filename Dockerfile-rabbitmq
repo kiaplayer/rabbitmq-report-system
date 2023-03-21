@@ -1,0 +1,4 @@
+FROM rabbitmq:3.10-management
+
+ADD rabbit_definitions.json /etc/rabbitmq/definitions.json
+ADD rabbitmq.conf /etc/rabbitmq

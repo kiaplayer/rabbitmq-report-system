@@ -1,0 +1,19 @@
+FROM golang:1.19-alpine as builder
+WORKDIR /build
+COPY go.* .
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /web-server cmd/report-used-car/web-server.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /subreport-accidents cmd/report-used-car/subreport-accidents.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /subreport-limits-wanted-info cmd/report-used-car/subreport-limits-wanted-info.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /subreport-ownership-history cmd/report-used-car/subreport-ownership-history.go
+
+FROM scratch AS app
+COPY --from=builder /web-server /web-server
+COPY --from=builder /build/internal/reports/used-car/templates /internal/reports/used-car/templates
+COPY --from=builder /build/internal/reports/used-car/static /internal/reports/used-car/static
+COPY --from=builder /subreport-accidents /subreport-accidents
+COPY --from=builder /subreport-limits-wanted-info /subreport-limits-wanted-info
+COPY --from=builder /subreport-ownership-history /subreport-ownership-history
+ENTRYPOINT ["/web-server"]
+EXPOSE 8080

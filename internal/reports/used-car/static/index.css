@@ -1,0 +1,13 @@
+form.new-report-form {
+    margin: 20px 0;
+}
+
+table.reports th {
+    text-align: center;
+    vertical-align: middle;
+    background-color: #DDDDDD;
+}
+
+table.reports td ol,ul {
+    margin: 0;
+}

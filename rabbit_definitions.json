@@ -1,0 +1,205 @@
+{
+  "rabbit_version": "3.10.13",
+  "rabbitmq_version": "3.10.13",
+  "product_name": "RabbitMQ",
+  "product_version": "3.10.13",
+  "users": [
+    {
+      "name": "report-used-car-subreport",
+      "password_hash": "P9RkH1+DqXBk/UFIMk9BcNaYAvj1zy/FvN1lsRGiSUZ2iSZ0",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [],
+      "limits": {}
+    },
+    {
+      "name": "guest",
+      "password_hash": "6QezFhFrZENI1IWH/hJXSOZLwNHoAUjeh0ju1ELVXR58NvsI",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ],
+      "limits": {}
+    },
+    {
+      "name": "report-used-car-webserver",
+      "password_hash": "mM5PdUjNdwHJ8EsIxZLh5YWJVjhHvcG1iGqz0u0XtACsS2bF",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [],
+      "limits": {}
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "report-used-car-webserver",
+      "vhost": "/",
+      "configure": "",
+      "write": "^reports\\.tasks$",
+      "read": "^reports\\.used-car\\.results$"
+    },
+    {
+      "user": "report-used-car-subreport",
+      "vhost": "/",
+      "configure": "",
+      "write": "^reports\\.results$",
+      "read": "^reports\\.used-car\\..*$"
+    },
+    {
+      "user": "guest",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [
+    {
+      "user": "report-used-car-subreport",
+      "vhost": "/",
+      "exchange": "reports.results",
+      "write": "^reports\\.used-car$",
+      "read": ""
+    },
+    {
+      "user": "report-used-car-webserver",
+      "vhost": "/",
+      "exchange": "reports.tasks",
+      "write": "^reports\\.used-car$",
+      "read": ""
+    }
+  ],
+  "parameters": [],
+  "global_parameters": [
+    {
+      "name": "internal_cluster_id",
+      "value": "rabbitmq-cluster-id-7aWbVCOhIlfo42wH8L_PfQ"
+    }
+  ],
+  "policies": [],
+  "queues": [
+    {
+      "name": "reports.used-car.results",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "reports.used-car.limits-wanted-info",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "reports.unrouted",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "reports.used-car.ownership-history",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "reports.used-car.accidents",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "reports.tasks",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {
+        "alternate-exchange": "reports.unrouted"
+      }
+    },
+    {
+      "name": "reports.unrouted",
+      "vhost": "/",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "reports.results",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {
+        "alternate-exchange": "reports.unrouted"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "source": "reports.results",
+      "vhost": "/",
+      "destination": "reports.used-car.results",
+      "destination_type": "queue",
+      "routing_key": "reports.used-car",
+      "arguments": {}
+    },
+    {
+      "source": "reports.tasks",
+      "vhost": "/",
+      "destination": "reports.used-car.accidents",
+      "destination_type": "queue",
+      "routing_key": "reports.used-car",
+      "arguments": {}
+    },
+    {
+      "source": "reports.tasks",
+      "vhost": "/",
+      "destination": "reports.used-car.limits-wanted-info",
+      "destination_type": "queue",
+      "routing_key": "reports.used-car",
+      "arguments": {}
+    },
+    {
+      "source": "reports.tasks",
+      "vhost": "/",
+      "destination": "reports.used-car.ownership-history",
+      "destination_type": "queue",
+      "routing_key": "reports.used-car",
+      "arguments": {}
+    },
+    {
+      "source": "reports.unrouted",
+      "vhost": "/",
+      "destination": "reports.unrouted",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    }
+  ]
+}

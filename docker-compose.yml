@@ -1,0 +1,73 @@
+version: "3.7"
+
+services:
+  rabbitmq:
+    image: rabbitmq-report-system-rabbit
+    build:
+      context: .
+      dockerfile: Dockerfile-rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    hostname: rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  web-server:
+    image: rabbitmq-report-system-app
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+      target: app
+    ports:
+      - '8080:8080'
+    environment:
+      - AMQP_URI=amqp://report-used-car-webserver:password@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  subreport-accidents:
+    image: rabbitmq-report-system-app
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+      target: app
+    environment:
+      - AMQP_URI=amqp://report-used-car-subreport:password@rabbitmq:5672/
+    entrypoint: /subreport-accidents
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  subreport-limits-wanted-info:
+    image: rabbitmq-report-system-app
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+      target: app
+    environment:
+      - AMQP_URI=amqp://report-used-car-subreport:password@rabbitmq:5672/
+    entrypoint: /subreport-limits-wanted-info
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  subreport-ownership-history:
+    image: rabbitmq-report-system-app
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+      target: app
+    environment:
+      - AMQP_URI=amqp://report-used-car-subreport:password@rabbitmq:5672/
+    entrypoint: /subreport-ownership-history
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
